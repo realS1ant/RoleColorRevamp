@@ -1,0 +1,19 @@
+{
+  "name": "rolecolorrevamp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "bot.js",
+  "scripts": {
+    "dev": "nodemon bot.js"
+  },
+  "author": "S1ant",
+  "license": "ISC",
+  "dependencies": {
+    "canvas": "^2.6.1",
+    "discord.js": "^12.5.1",
+    "dotenv": "^8.2.0",
+    "mongoose": "^5.11.8",
+    "nodemon": "^2.0.6",
+    "redis": "^3.0.2"
+  }
+}
