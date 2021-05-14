@@ -42,6 +42,7 @@ function errorEmbed() {
 function getColorImage(color) {
     return (new djs.MessageAttachment(createImage(color), `${color}.png`));
 }
+
 /**
  * 
  * @param {djs.Guild} guild
@@ -49,9 +50,12 @@ function getColorImage(color) {
  */
 async function getColors(guild) {
     var prefix = await settings.getColorPrefix(guild.id);
-    return guild.roles.cache.filter(role => role.name.toLowerCase().startsWith(prefix.toLowerCase()));
+    let colors = new djs.Collection();
+    guild.roles.cache.filter(role => role.name.toLowerCase().startsWith(prefix.toLowerCase())).forEach(val => {
+        colors.set(val.name.toLowerCase(), val);
+    });
+    return colors;
 }
-
 
 /**
  * 

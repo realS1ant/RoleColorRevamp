@@ -1,5 +1,5 @@
-const { defaultEmbed, errorEmbed, getColors } = require('../utils');
-const settings = require('../settings/settings');
+const { defaultEmbed, errorEmbed, getColors } = require('../../utils');
+const settings = require('../../settings/settings');
 const djs = require('discord.js');
 
 /**

@@ -15,25 +15,54 @@ mongoose.connect(`mongodb+srv://${process.env.MONGOUSERNAME}:${process.env.MONGO
         console.error(`Failed Database Connection!\n${reason}`);
     });
 
+// fs.readdir('./commands', (err, files) => {
+//     if (err) console.log(err);
+
+//     let jsfiles = files.filter(f => f.split(".").pop() == "js");
+
+//     if (jsfiles.length <= 0) {
+//         console.log("Couldn't find any command files!");
+//     } else {
+//         console.log("Command Files Found!");
+//     }
+
+//     jsfiles.forEach((f, i) => {
+//         let cmdfile = require(`./commands/${f}`);
+//         console.log(`${f} has been loaded!`);
+//         client.commands.set(cmdfile.info.name.toLowerCase(), cmdfile);
+//         cmdfile.info.aliases.forEach(alias => {
+//             client.aliases.set(alias.toLowerCase(), cmdfile.info.name.toLowerCase());
+//         });
+//     });
+// });
+
 fs.readdir('./commands', (err, files) => {
-    if (err) console.log(err);
+    if (err) console.error(err);
 
-    let jsfiles = files.filter(f => f.split(".").pop() == "js");
+    let rootFiles = files.filter(f => f.split(".").pop() == "js");
+    let categoryDirs = files.filter(f => !f.includes('.js'));
 
-    if (jsfiles.length <= 0) {
-        console.log("Couldn't find any command files!");
-    } else {
-        console.log("Command Files Found!");
-    }
-
-    jsfiles.forEach((f, i) => {
-        let cmdfile = require(`./commands/${f}`);
-        console.log(`${f} has been loaded!`);
-        client.commands.set(cmdfile.info.name.toLowerCase(), cmdfile);
-        cmdfile.info.aliases.forEach(alias => {
-            client.aliases.set(alias.toLowerCase(), cmdfile.info.name.toLowerCase());
+    let loadedCommands = [];
+    rootFiles.forEach((file, index) => {
+        let cmd = require(`./commands/${file}`);
+        loadedCommands.push(cmd.info.name);
+        client.commands.set(cmd.info.name.toLowerCase(), cmd);
+        cmd.info.aliases.forEach(alias => {
+            client.aliases.set(alias.toLowerCase(), cmd.info.name.toLowerCase());
         });
     });
+    categoryDirs.forEach((dir, index) => {
+        const files = fs.readdirSync(`./commands/${dir}`).filter(file => file.endsWith('.js'));
+        for (const file of files) {
+            const cmd = require(`./commands/${dir}/${file}`);
+            loadedCommands.push(cmd.info.name);
+            client.commands.set(cmd.info.name.toLowerCase(), cmd);
+            cmd.info.aliases.forEach(alias => {
+                client.aliases.set(alias.toLowerCase(), cmd.info.name.toLowerCase());
+            });
+        }
+    });
+    console.log(`Loaded commands: ${loadedCommands.join(', ')}`)
 });
 
 client.on('ready', async () => {
@@ -75,7 +104,7 @@ client.on('error', (error) => {
 
 client.on('guildCreate', async (guild) => {
     let channel = '';
-    guild.channels.cache.every(async (c, key) => {
+    guild.channels.cache.every(async c => {
         if (c.type == 'text' && c.permissionsFor(client.user).has('SEND_MESSAGES') && c.name.toLowerCase() !== "announcements" && c.name.toLowerCase() !== "news" && c.name.toLowerCase() !== "important" && channel === '') {
             channel = c;
         }

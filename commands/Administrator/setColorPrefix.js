@@ -1,6 +1,7 @@
 const djs = require("discord.js");
-const settings = require("../settings/settings.js");
-const { defaultEmbed, errorEmbed, hasCommandPermission } = require('../utils');
+const ColorPrefixes = require("../../schemas/ColorPrefixes.js");
+const settings = require("../../settings/settings.js");
+const { defaultEmbed, errorEmbed, getColors } = require('../../utils');
 
 /**
  *
@@ -12,9 +13,10 @@ const { defaultEmbed, errorEmbed, hasCommandPermission } = require('../utils');
  */
 module.exports.run = async (client, mongoose, message, args) => {
     const embed = await defaultEmbed(message.guild.id);
+    const oldPrefix = await settings.getColorPrefix(message.guild.id);
     if (args.length < 1) {
         const prefix = await settings.getColorPrefix(message.guild.id);
-        message.reply((await defaultEmbed(message.guild.id)).setDescription(`The color prefix is what comes before the name of your color to make that color's role name.
+        message.reply(embed.setDescription(`The color prefix is what comes before the name of your color to make that color's role name.
         \nYour current color prefix is: ${prefix}`));
         return;
     } else {
@@ -26,11 +28,14 @@ module.exports.run = async (client, mongoose, message, args) => {
             message.reply(errorEmbed().setDescription('Invalid Prefix!'));
         } else {
             var res = await message.channel.send(embed.setDescription('Updating...'));
-            settings.setColorPrefix(message.guild.id, args[0]).then(async () => {
-                res.delete();
-                const embed = await defaultEmbed(message.guild.id);
-                message.reply(embed.addField("Changed Color Prefix to:", args[0]));
+            const colors = await getColors(message.guild);
+            colors.forEach(async role => {
+                await role.setName(role.name.replace(oldPrefix, args[0]));
             });
+            await settings.setColorPrefix(message.guild.id, args[0]);
+            res.delete();
+            embed.setDescription('');
+            message.reply(embed.addField("Changed Color Prefix to:", args[0]));
         }
     }
 }

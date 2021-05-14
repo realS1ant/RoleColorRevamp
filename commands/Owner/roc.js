@@ -1,5 +1,5 @@
-const { defaultEmbed, errorEmbed } = require('../utils');
-const settings = require('../settings/settings');
+const { defaultEmbed, errorEmbed } = require('../../utils');
+const settings = require('../../settings/settings');
 const djs = require('discord.js');
 
 /**
@@ -23,6 +23,6 @@ module.exports.run = async (client, mongoose, message, args) => {
 }
 
 module.exports.info = {
-    name: 'roc',
+    name: 'rac',
     aliases: ['removeallcolors', 'removeall']
 }

@@ -2,9 +2,9 @@ const discordjs = require('discord.js');
 const CommandPrefixes = require("../schemas/CommandPrefixes");
 const GuildColors = require('../schemas/GuildColors');
 const ColorPrefixes = require('../schemas/ColorPrefixes');
-var guildPrefixes = new discordjs.Collection();
-var guildColors = new discordjs.Collection();
-var colorPrefixes = new discordjs.Collection();
+var guildPrefixesCache = new discordjs.Collection();
+var guildColorsCache = new discordjs.Collection();
+var colorPrefixesCache = new discordjs.Collection();
 
 //Guild Colors
 //function getGuildColor(guildId) {
@@ -13,16 +13,17 @@ var colorPrefixes = new discordjs.Collection();
 //}
 
 async function getGuildColor(guildId) {
-    if (guildColors.has(guildId)) {
-        return guildColors.get(guildId);
+    if (!guildId) return process.env.DEFAULTCOLOR;
+    if (guildColorsCache.has(guildId)) {
+        return guildColorsCache.get(guildId);
     } else {
         if (await GuildColors.exists({ guildId })) {
             const color = await GuildColors.findOne({ guildId });
-            guildColors.set(guildId, color.get('cmdPrefix'));
+            guildColorsCache.set(guildId, color.get('cmdPrefix'));
             return color.get('color');
         } else {
             const color = process.env.DEFAULTCOLOR;
-            guildColors.set(guildId, color);
+            guildColorsCache.set(guildId, color);
             return color;
         }
     }
@@ -30,15 +31,14 @@ async function getGuildColor(guildId) {
 
 async function setGuildColor(guildId, color) {
     if (color.toLowerCase() == process.env.DEFAULTCOLOR.toLowerCase()) {
-        guildColors.set(guildId, process.env.DEFAULTCOLOR);
+        guildColorsCache.set(guildId, process.env.DEFAULTCOLOR);
         await GuildColors.findOneAndDelete({ guildId });
         return;
     }
 
-    if (guildColors.has(guildId)) {
-        console.log('in local cache');
-        guildColors.delete(guildId);
-        guildColors.set(guildId, color);
+    if (guildColorsCache.has(guildId)) {
+        guildColorsCache.delete(guildId);
+        guildColorsCache.set(guildId, color);
         if (await GuildColors.exists({ guildId })) {
             await GuildColors.findOneAndUpdate({ guildId }, { color });
         } else {
@@ -48,7 +48,6 @@ async function setGuildColor(guildId, color) {
             }).save();
         }
     } else {
-        console.log('pulling from db');
         if (await GuildColors.exists({ guildId })) {
             await GuildColors.findOneAndUpdate({ guildId }, { color });
         } else {
@@ -57,7 +56,7 @@ async function setGuildColor(guildId, color) {
                 cmdPrefix
             }).save();
         }
-        guildColors.set(guildId, color);
+        guildColorsCache.set(guildId, color);
     }
 }
 
@@ -95,16 +94,16 @@ async function setGuildPrefix(guildId, cmdPrefix) {
 }*/
 //Cached version
 async function getGuildPrefix(guildId) {
-    if (guildPrefixes.has(guildId)) {
-        return guildPrefixes.get(guildId);
+    if (guildPrefixesCache.has(guildId)) {
+        return guildPrefixesCache.get(guildId);
     } else {
         if (await CommandPrefixes.exists({ guildId })) {
             const prefix = await CommandPrefixes.findOne({ guildId });
-            guildPrefixes.set(guildId, prefix.get('cmdPrefix'));
+            guildPrefixesCache.set(guildId, prefix.get('cmdPrefix'));
             return prefix.get('cmdPrefix');
         } else {
             const prefix = process.env.DEFAULTPREFIX;
-            guildPrefixes.set(guildId, prefix);
+            guildPrefixesCache.set(guildId, prefix);
             return prefix;
         }
     }
@@ -112,14 +111,14 @@ async function getGuildPrefix(guildId) {
 
 async function setGuildPrefix(guildId, cmdPrefix) {
     if (cmdPrefix.toLowerCase() == process.env.DEFAULTPREFIX.toLowerCase()) {
-        guildPrefixes.set(guildId, process.env.DEFAULTPREFIX);
+        guildPrefixesCache.set(guildId, process.env.DEFAULTPREFIX);
         await CommandPrefixes.findOneAndDelete({ guildId });
         return;
     }
 
-    if (guildPrefixes.has(guildId)) {
-        guildPrefixes.delete(guildId);
-        guildPrefixes.set(guildId, cmdPrefix);
+    if (guildPrefixesCache.has(guildId)) {
+        guildPrefixesCache.delete(guildId);
+        guildPrefixesCache.set(guildId, cmdPrefix);
         if (await CommandPrefixes.exists({ guildId })) {
             await CommandPrefixes.findOneAndUpdate({ guildId }, { cmdPrefix });
         } else {
@@ -137,21 +136,21 @@ async function setGuildPrefix(guildId, cmdPrefix) {
                 cmdPrefix
             }).save();
         }
-        guildPrefixes.set(guildId, cmdPrefix);
+        guildPrefixesCache.set(guildId, cmdPrefix);
     }
 }
 
 async function getColorPrefix(guildId) {
-    if (colorPrefixes.has(guildId)) {
-        return colorPrefixes.get(guildId);
+    if (colorPrefixesCache.has(guildId)) {
+        return colorPrefixesCache.get(guildId);
     } else {
         if (await ColorPrefixes.exists({ guildId })) {
             const prefix = await ColorPrefixes.findOne({ guildId });
-            colorPrefixes.set(guildId, prefix.get('colorPrefix'));
+            colorPrefixesCache.set(guildId, prefix.get('colorPrefix'));
             return prefix.get('colorPrefix');
         } else {
             const prefix = process.env.DEFAULTCOLORPREFIX;
-            colorPrefixes.set(guildId, prefix);
+            colorPrefixesCache.set(guildId, prefix);
             return prefix;
         }
     }
@@ -159,14 +158,14 @@ async function getColorPrefix(guildId) {
 
 async function setColorPrefix(guildId, colorPrefix) {
     if (colorPrefix.toLowerCase() == process.env.DEFAULTCOLORPREFIX.toLowerCase()) {
-        colorPrefix.set(guildId, process.env.DEFAULTCOLORPREFIX);
-        await colorPrefix.findOneAndDelete({ guildId });
+        colorPrefixesCache.set(guildId, process.env.DEFAULTCOLORPREFIX);
+        await ColorPrefixes.findOneAndDelete({ guildId });
         return;
     }
 
-    if (colorPrefixes.has(guildId)) {
-        colorPrefixes.delete(guildId);
-        colorPrefixes.set(guildId, colorPrefix);
+    if (colorPrefixesCache.has(guildId)) {
+        colorPrefixesCache.delete(guildId);
+        colorPrefixesCache.set(guildId, colorPrefix);
         if (await ColorPrefixes.exists({ guildId })) {
             await ColorPrefixes.findOneAndUpdate({ guildId }, { colorPrefix });
         } else {
@@ -184,7 +183,7 @@ async function setColorPrefix(guildId, colorPrefix) {
                 colorPrefix
             }).save();
         }
-        colorPrefixes.set(guildId, colorPrefix);
+        colorPrefixesCache.set(guildId, colorPrefix);
     }
 }
 

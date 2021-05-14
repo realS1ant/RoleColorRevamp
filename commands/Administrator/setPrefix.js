@@ -1,7 +1,7 @@
 const djs = require("discord.js");
-const CommandPrefixes = require("../schemas/CommandPrefixes");
-const settings = require("../settings/settings.js");
-const { defaultEmbed, errorEmbed, hasCommandPermission } = require('../utils');
+const CommandPrefixes = require("../../schemas/CommandPrefixes");
+const settings = require("../../settings/settings.js");
+const { defaultEmbed, errorEmbed, hasCommandPermission, getColors } = require('../../utils');
 
 /**
  *
@@ -26,15 +26,13 @@ module.exports.run = async (client, mongoose, message, args) => {
             message.reply(errorEmbed().setDescription('Invalid Prefix!'));
         } else {
             var res = await message.channel.send(embed.setDescription('Updating...'));
-            settings.setGuildPrefix(message.guild.id, args[0]).then(async () => {
-                res.delete();
-                const embed = await defaultEmbed(message.guild.id);
-                message.reply(embed.addField("Changed Command Prefix to:", args[0]));
-            });
+            await settings.setGuildPrefix(message.guild.id, args[0]);
+            res.delete();
+            message.reply(embed.addField("Changed Command Prefix to:", args[0]));
         }
     }
 }
 module.exports.info = {
     name: 'setPrefix',
-    aliases: ['prefix']
+    aliases: ['prefix', 'setguildprefix', 'setcommandprefix', 'setcmdprefix', 'guildprefix', 'commandprefix', 'cmdprefix']
 }

@@ -1,8 +1,8 @@
 const djs = require("discord.js");
 const canvas = require('canvas');
-const CommandPrefixes = require("../schemas/CommandPrefixes");
-const settings = require("../settings/settings.js");
-const { defaultEmbed, errorEmbed, getColorImage, hasCommandPermission } = require('../utils');
+const CommandPrefixes = require("../../schemas/CommandPrefixes");
+const settings = require("../../settings/settings.js");
+const { defaultEmbed, errorEmbed, getColorImage, hasCommandPermission } = require('../../utils');
 
 
 
@@ -43,5 +43,5 @@ module.exports.run = async (client, mongoose, message, args) => {
 }
 module.exports.info = {
     name: 'setGuildColor',
-    aliases: ['setBotColor', 'setEmbedColor']
+    aliases: ['setBotColor', 'setEmbedColor', 'guildColor', 'botColor']
 }

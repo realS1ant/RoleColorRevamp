@@ -1,5 +1,5 @@
-const { defaultEmbed } = require('../utils');
-const settings = require('../settings/settings');
+const { defaultEmbed } = require('../../utils');
+const settings = require('../../settings/settings');
 const djs = require('discord.js');
 
 /**
@@ -21,6 +21,7 @@ module.exports.run = async (client, mongoose, message, args) => {
          » ${prefix}setColor
          » ${prefix}vote
         \n**Administrator Commands:**
+         » ${prefix}addColor
          » ${prefix}setPrefix
          » ${prefix}setColorPrefix
          » ${prefix}setDefaultColor
